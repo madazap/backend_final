@@ -3,14 +3,22 @@ import { json } from "express";
 import cartManager from "../cartsManager";
 
 const cartRouter = Router();
-let carts = [];
 cartRouter.use(json());
+const carts = new cartManager;
 
-cartRouter.get("/:cid", (req, res)=>{
-    //listar productos del carrito
+
+cartRouter.get("/:cid", async (req, res)=>{
+    const idc= req.query;
+    const cart = await carts.getIdCart(idc);
+    res.send(cart);
 });
 
-cartRouter.post("/", (req,res)=>{
+cartRouter.post("/", async (req,res)=>{
+    // agregar productos a un carro completamente nuevo
+    const {prod}= req.body;
+    const newCart = await carts.addCart(prod);
+    const result = await carts.getCart();
+    await res.send(result);
 
 });
 
