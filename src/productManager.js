@@ -5,19 +5,21 @@ class ProductManager {
 
   constructor() {}
 
-  async addProduct(title,description,code,price,status,stock,category,thumbnails) {
+  async addProduct(title,description,code,price,status,stock,category,thumbnail) {
     
-    contador = (await this.contadorUnico())+1;
+    console.log("estamos en la creacion del producto");
+    let id = (await this.contadorUnico())+1;
+    console.log(id);
     const products = await this.getProducts();
     let exist = products.find((a) => a.code === code);
 
         if(exist){
             // preguntar como devolver al server desde la clase un mensaje de error.
-            console.error("El codigo de producto que quieres crear ya existe");
+            throw new Error("El codigo que se quiere crear ya existe");
         }
-        else{
+        
             const newProduct = {
-              contador,
+              id,
               title,
               description,
               code,
@@ -25,12 +27,10 @@ class ProductManager {
               status,
               stock,
               category,
-              thumbnails,
-            };
-        }
-
-    const updProducts = [...products, newProduct];
-    await fs.promises.writeFile(this.#path, JSON.stringify(updProducts));
+              thumbnail,};
+            const prodsUpd = [...products, newProduct];
+            await fs.promises.writeFile(this.#path, JSON.stringify(prodsUpd));
+            return newProduct;
   }
 
   async getProducts() {
@@ -42,56 +42,64 @@ class ProductManager {
     }
   }
 
-  async getProductsById(id) {
-    console.log(id);
+  async getProductsById(idb) {
+    
     try {
+      console.log(idb);
       const products = await this.getProducts();
-      let prodB = products.filter((p) => p.contador === id);
-      console.log(prodB);
+      let prodB = products.find((p) => p.id ===parseInt(idb.pid));
+      return prodB;
+      
     } catch (error) {
       console.error("El producto especificado no existe ");
     }
   }
 
-  async updateProduct(id, nuevo_valor) {
-    
+  async updateProduct(idn, nuevo_valor) {
+          const productsU = await this.getProducts();
+          idn=parseInt(idn.pid);
+         
     try {
-        const productsU = await this.getProducts();
-        let prodU = productsU.filter((u)=>u.contador===id);
-        let prodIX = productsU.findIndex((obj) => obj.contador === id);
+        let prodU = productsU.find((u)=>u.id===idn);
+        //let prodIX = productsU.findIndex((obj) => obj.id === idn);
+        //console.log(prodU);
+        //console.log(prodIX);
 
-        if(prodU){
-            // se pueden retornar error status desde la clase ?
-             console.log(
-               "Ha ocurrido un error no se puede actualizar el producto"
+        if(!prodU){
+             console.error(
+               "No existe el producto que deseas actualizar"
              );
         }
-
-        const updateProd = productsU.map((u)=> {
-            if(u.contador===id){
-                return {contador: u.contador, ...nuevo_valor};
-            }
-
-        });
-
-        productsU=updateProd;
-        await fs.promises.unlink(this.#path);
-        await fs.promises.writeFile(this.#path, JSON.stringify(productsU));
+        else{
+               
+               const updateProd = productsU.map((u) => {
+                if (u.id === idn) {
+                  return {
+                   ...u,
+                   ...nuevo_valor,
+                  };
+                }
+                 return u;
+              }); 
+             
+              //await fs.promises.unlink(this.#path);
+              await fs.promises.writeFile(this.#path,JSON.stringify(updateProd));
+        }
         
-
     } catch (error) {
-      console.log("Ha ocurrido un error no se puede actualizar el producto");
+      console.log(error);
     }
   }
 
 
-  async deleteProduct(id) {
+  async deleteProduct(idn) {
     //crear nuevo arreglo con los prodcutos excepto el del id enviado
     try {
       const products = await this.getProducts();
-      let nuevosProd = products.filter((producto) => producto.contador != id);
+      let nuevosProd = products.find((producto) => producto.id != idn);
       await fs.promises.unlink(this.#path);
       await fs.promises.writeFile(this.#path, JSON.stringify(nuevosProd));
+
     } catch (error) {
       console.log("Ha ocurrido un error no se puede borrar el producto");
     }
@@ -99,15 +107,16 @@ class ProductManager {
 
   async contadorUnico() {
     let ids = [];
-    const products = await this.getProducts();
-
-    for (let x = 0; x < products.length; x++) {
-      ids[x] = parseInt(products[x].contador);
+    const product_si = await this.getProducts();
+    console.log("desde contador unico");
+    for (let x = 0; x < product_si.length; x++) {
+      ids[x] = parseInt(product_si[x].id);
     }
-    //retorno el id mayor despues de ordenar y se agregar el consecutivo
-    let id = ids.sort(function (a, b) {
+    //retorno el id mayor despues de ordenar
+    ids.sort(function (a, b) {
       return b - a;
     });
+    console.log(ids[0]);
     return ids[0];
   }
 }
