@@ -6,10 +6,10 @@ const app = express();
 app.use("/api/products", productRouter);
 app.use("/api/carts", cartRouter);
 app.use(express.json());
-//app.use(urlencoded());
+app.use(urlencoded({extended:true}));
 
 
 app.listen(8080, () => {
-  console.log("Servidor escuchando por 8080");
+  console.log("Servidor escuchando por puerto 8080");
 });
 

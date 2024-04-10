@@ -9,7 +9,7 @@
     "start": "node ./src/app.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "Michel Daza",
   "license": "ISC",
   "dependencies": {
     "express": "^4.18.2"

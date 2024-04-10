@@ -2,13 +2,14 @@ import fs from "fs";
 
 class ProductManager {
   #path = "./products.json";
+ 
 
   constructor() {}
 
   async addProduct(title,description,code,price,status,stock,category,thumbnail) {
     
     console.log("estamos en la creacion del producto");
-    let id = (await this.contadorUnico())+1;
+    let id = (await this.contadorUnico()) +1;
     console.log(id);
     const products = await this.getProducts();
     let exist = products.find((a) => a.code === code);
@@ -35,10 +36,12 @@ class ProductManager {
 
   async getProducts() {
     try {
+      console.log("estamos en la consulta del producto");
       const products = await fs.promises.readFile(this.#path, "utf-8");
+      console.log(products);
       return JSON.parse(products);
     } catch (e) {
-      return [];
+      return e;
     }
   }
 
