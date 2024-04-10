@@ -4,7 +4,7 @@ import ProductManager from "./productManager.js";
 const products = new ProductManager;
 
 class cartManager{
-    #pathc= "./carts.json";
+    #pathc= "./src/carts.json";
     
 
     constructor(){}
